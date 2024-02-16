@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure OpenAI Service Demo</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Azure OpenAI Service Demo</h1>
+        <textarea id="input-text" placeholder="Enter your text here..."></textarea>
+        <button id="submit-btn">Submit</button>
+        <div id="response"></div>
+    </div>
+
+    <script>
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            var submitButton = document.getElementById('submit-btn');
+            var inputText = document.getElementById('input-text').value;
+            var responseContainer = document.getElementById('response');
+
+            // ボタンを無効化し、ローディング中のテキストを表示
+            submitButton.disabled = true;
+            submitButton.textContent = 'Loading...';
+
+    fetch('<YOUR_API_ENDPOINT>/chat/completions?api-version=2023-07-01-preview', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'api-key': '<YOUR_API_KEY>'
+        },
+        body: JSON.stringify({
+            messages: [{role: 'system', content: 'あなたはチャットbotです。日本語で返答して'}, {role: 'user', content: inputText}],
+            max_tokens: 800,
+            temperature: 0.7,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            top_p: 0.95,
+            stop: null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // 応答からassistantのメッセージのみを抽出して表示
+        if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+            responseContainer.innerHTML = data.choices[0].message.content;
+        } else {
+            responseContainer.innerHTML = '応答が見つかりませんでした。';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        // ローディングが終了したら、ボタンを再度有効にし、テキストを元に戻す
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit';
+    });
+});
+
+    </script>
+</body>
+
+
+</html>
